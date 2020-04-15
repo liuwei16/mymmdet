@@ -4,6 +4,7 @@ mmcv_exe/
 requirements/
 mmdet/*
 !mmdet/datasets/
+!mmdet/models/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
