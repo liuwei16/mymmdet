@@ -1,3 +1,9 @@
+#custom
+data/
+mmcv_exe/
+mmdet/
+!mmdet/datasets
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
