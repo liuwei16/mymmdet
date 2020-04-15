@@ -1,7 +1,8 @@
 #custom
 data
 mmcv_exe/
-mmdet/
+requirements/
+mmdet/*
 !mmdet/datasets/*
 
 # Byte-compiled / optimized / DLL files
