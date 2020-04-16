@@ -179,10 +179,10 @@ class Collect(object):
 
     def __call__(self, results):
         data = {}
-        # img_meta = {}
-        # for key in self.meta_keys:
-        #     img_meta[key] = results[key]
-        # data['img_meta'] = DC(img_meta, cpu_only=True)
+        img_meta = {}
+        for key in self.meta_keys:
+            img_meta[key] = results[key]
+        data['img_meta'] = DC(img_meta, cpu_only=True)
         for key in self.keys:
             data[key] = results[key]
         return data

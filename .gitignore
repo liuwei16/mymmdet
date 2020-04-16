@@ -1,6 +1,7 @@
 #custom
 .idea
 data
+work_dirs
 mmcv_exe/
 requirements/
 mmdet/*

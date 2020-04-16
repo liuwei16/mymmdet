@@ -22,6 +22,7 @@ model = dict(
     bbox_head=dict(
         type='RetinaHead',
         num_classes=81,
+        in_channels=256,
         stacked_convs=4,
         feat_channels=256,
         octave_base_scale=4,
