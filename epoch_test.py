@@ -2,6 +2,7 @@ import os
 import mmcv
 import time
 from mmcv.parallel import MMDataParallel
+from mmcv.runner import load_checkpoint
 from mmdet.apis import single_gpu_test
 from mmdet.datasets import build_dataset, build_dataloader
 from mmdet.models import build_detector
@@ -27,16 +28,17 @@ data_loader = build_dataloader(
     workers_per_gpu=0,
     dist=False,
     shuffle=False)
-# build the model and load checkpoint
-model = build_detector(cfg.model, train_cfg=None, test_cfg=cfg.test_cfg)
 
-for i in range(1, 13):
+for i in range(1, 8):
     respath = os.path.join(res_dir, '{}.pkl'.format(i))
     if os.path.isfile(respath):
         with open(respath, 'rb') as fid:
             outputs = cPickle.load(fid)
     else:
+        # build the model and load checkpoint
+        model = build_detector(cfg.model, train_cfg=None, test_cfg=cfg.test_cfg)
         checkpoint_path = os.path.join(work_dir, 'epoch_{}.pth'.format(i))
+        load_checkpoint(model, checkpoint_path, map_location='cpu')
         model = MMDataParallel(model, device_ids=[0])
         outputs = single_gpu_test(model, data_loader)
         mmcv.dump(outputs, respath)
