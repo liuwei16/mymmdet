@@ -1,10 +1,11 @@
 # model settings
 model = dict(
     type='RetinaNet',
-    pretrained='/home/aistudio/work/resnet50-19c8e357.pth',
+    # pretrained='/home/aistudio/work/resnet50-19c8e357.pth',
+    pretrained='/home/aistudio/work/resnet18-5c106cde.pth',
     backbone=dict(
         type='ResNet',
-        depth=50,
+        depth=18,
         num_stages=4,
         out_indices=(0, 1, 2, 3),
         frozen_stages=1,
@@ -13,7 +14,8 @@ model = dict(
     ),
     neck=dict(
         type='FPN',
-        in_channels=[256, 512, 1024, 2048],
+        # in_channels=[256, 512, 1024, 2048],
+        in_channels=[64, 128, 256, 512],
         out_channels=256,
         start_level=1,
         add_extra_convs=True,
@@ -21,7 +23,7 @@ model = dict(
     ),
     bbox_head=dict(
         type='RetinaHead',
-        num_classes=81,
+        num_classes=8,
         in_channels=256,
         stacked_convs=4,
         feat_channels=256,
@@ -94,7 +96,7 @@ test_pipeline = [
     dict(
         type='MultiScaleFlipAug',
         img_scale=(1344, 1344),
-        flip=True,
+        flip=False,
         transforms=[
             dict(type='Resize', keep_ratio=True),
             dict(type='RandomFlip'),

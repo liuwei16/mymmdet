@@ -9,7 +9,7 @@ from mmdet.apis import multi_gpu_test, single_gpu_test
 from mmdet.core import wrap_fp16_model
 from mmdet.datasets import build_dataset, build_dataloader
 from mmdet.models import build_detector
-
+import ipdb
 class MultipleKVAction(argparse.Action):
     """
     argparse action to split an argument into KEY=VALUE form
@@ -123,7 +123,7 @@ def main():
     data_loader = build_dataloader(
         dataset=dataset,
         imgs_per_gpu=1,
-        workers_per_gpu=1,
+        workers_per_gpu=0,
         dist=distributed,
         shuffle=False)
 
@@ -132,11 +132,15 @@ def main():
     fp16_cfg = cfg.get('fp16', None)
     if fp16_cfg is not None:
         wrap_fp16_model(model)
-    load_checkpoint(model, args.checkpoint, map_location='cpu')
-    model.CLASSES = dataset.CLASSES
+    checkpoint = load_checkpoint(model, args.checkpoint, map_location='cpu')
+    if 'CLASSES' in checkpoint['meta']:
+        model.CLASSES = checkpoint['meta']['CLASSES']
+    else:
+        model.CLASSES = dataset.CLASSES
 
     if not distributed:
         model = MMDataParallel(model, device_ids=[0])
+        # ipdb.set_trace(context=10)
         outputs = single_gpu_test(model, data_loader, args.show)
     else:
         model = MMDistributedDataParallel(
