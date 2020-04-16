@@ -9,7 +9,6 @@ from torch.utils.data import DataLoader
 
 from .sampler import DistributedGroupSampler, DistributedSampler, GroupSampler
 
-import ipdb
 if platform.system() != 'Windows':
     # https://github.com/pytorch/pytorch/issues/973
     import resource
@@ -47,7 +46,6 @@ def build_dataloader(dataset,
         DataLoader: A PyTorch dataloader.
     """
     rank, world_size = get_dist_info()
-    # ipdb.set_trace(context=10)
     if dist:
         # DistributedGroupSampler will definitely shuffle the data to satisfy
         # that images on each GPU are in the same group

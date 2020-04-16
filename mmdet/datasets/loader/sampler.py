@@ -44,27 +44,23 @@ class GroupSampler(Sampler):
         self.group_sizes = np.bincount(self.flag)
         self.num_samples = 0
         for i, size in enumerate(self.group_sizes):
-            self.num_samples += int(np.ceil(
-                size / self.samples_per_gpu)) * self.samples_per_gpu
+            self.num_samples += int(np.ceil(size/self.samples_per_gpu)) * self.samples_per_gpu
 
     def __iter__(self):
         indices = []
         for i, size in enumerate(self.group_sizes):
-            if size == 0:
+            if size ==0:
                 continue
             indice = np.where(self.flag == i)[0]
             assert len(indice) == size
             np.random.shuffle(indice)
-            num_extra = int(np.ceil(size / self.samples_per_gpu)
-                            ) * self.samples_per_gpu - len(indice)
-            indice = np.concatenate(
-                [indice, np.random.choice(indice, num_extra)])
+            num_extra = int(np.ceil(size/self.samples_per_gpu)) * self.samples_per_gpu - len(indice)
+            indice = np.concatenate([indice, np.random.choice(indice, num_extra)])
             indices.append(indice)
         indices = np.concatenate(indices)
         indices = [
-            indices[i * self.samples_per_gpu:(i + 1) * self.samples_per_gpu]
-            for i in np.random.permutation(
-                range(len(indices) // self.samples_per_gpu))
+            indices[i * self.samples_per_gpu:(i+1) * self.samples_per_gpu]
+            for i in np.random.permutation(range(len(indices)//self.samples_per_gpu))
         ]
         indices = np.concatenate(indices)
         indices = indices.astype(np.int64).tolist()
@@ -73,6 +69,10 @@ class GroupSampler(Sampler):
 
     def __len__(self):
         return self.num_samples
+
+
+
+
 
 
 class DistributedGroupSampler(Sampler):
