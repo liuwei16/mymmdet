@@ -29,7 +29,7 @@ data_loader = build_dataloader(
     dist=False,
     shuffle=False)
 
-for i in range(1, 8):
+for i in range(1, 13):
     respath = os.path.join(res_dir, '{}.pkl'.format(i))
     if os.path.isfile(respath):
         with open(respath, 'rb') as fid:
