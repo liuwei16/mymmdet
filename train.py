@@ -71,22 +71,55 @@ def main():
     #create work_dir
     mmcv.mkdir_or_exist(osp.abspath(cfg.work_dir))
     #init the logger before other steps
-    # timestamp = time.strftime('%Y%m%d_%H%M%S', time.localtime())
-    # log_file = osp.join(cfg.work_dir, '{}.log'.format(timestamp))
-    # logger = get_root_logger(log_file, cfg.log_level)
+    timestamp = time.strftime('%Y%m%d_%H%M%S', time.localtime())
+    log_file = osp.join(cfg.work_dir, '{}.log'.format(timestamp))
+    logger = get_root_logger(log_file, cfg.log_level)
 
-    dataset = build_dataset(cfg.data.train)
+    # init the meta dict to record some important information such as
+    # environment info and seed, which will be logged
+    meta = dict()
+    # log env info
+    env_info_dict = collect_env()
+    env_info = '\n'.join(['{}:{}'.format(k, v) for k, v in env_info_dict.items()])
+    dash_line = '-'*60 + '\n'
+    logger.info('Env info:\n' + dash_line + env_info + '\n' + dash_line)
+    meta['env_info'] = env_info
+    # log some basic info
+    logger.info('Distributed training: {}'.format(distributed))
+    logger.info('Config:\n{}'.format(cfg.text))
+    # set random seeds
+    if args.seed is not None:
+        logger.info('Set random seed to {}, deterministic: {}'.format(args.seed, args.deterministic))
+        set_random_seed(args.seed, deterministic=args.deterministic)
+    cfg.seed = args.seed
+    meta['seed'] = args.seed
+    model = build_detector(cfg.model,
+                           train_cfg=cfg.train_cfg,
+                           test_cfg=cfg.test_cfg)
 
-    dataloader = build_dataloader(dataset=dataset,
-                     imgs_per_gpu=cfg.data.imgs_per_gpu,
-                     workers_per_gpu=cfg.data.workers_per_gpu,
-                     num_gpus=cfg.gpus,
-                     dist=False)
+    datasets = [build_dataset(cfg.data.train)]
+    if len(cfg.workflow) == 2:
+        val_dataset = copy.deepcopy(cfg.data.val)
+        val_dataset.pipeline = cfg.data.train.pipeline
+        datasets.append(build_dataset(val_dataset))
+    if cfg.checkpoint_config is not None:
+        cfg.checkpoint_config.meta = dict(
+            mmdet_version=__version__,
+            config=cfg.text,
+            CLASSES=datasets[0].CLASSES
+        )
+    # add an attribute for visualization convenience
+    model.CLASSES = datasets[0].CLASSES
     # ipdb.set_trace(context=10)
-    for i,data in enumerate(dataloader):
-        print(i)
-
-
+    train_detector(
+        model=model,
+        dataset=datasets,
+        cfg=cfg,
+        distributed=distributed,
+        validate=args.validate,
+        timestamp=timestamp,
+        meta=meta
+    )
 
 if __name__ == '__main__':
     main()

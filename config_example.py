@@ -104,10 +104,10 @@ test_pipeline = [
 ]
 data = dict(
     imgs_per_gpu=4,
-    workers_per_gpu=1,
+    workers_per_gpu=0,
     train=dict(
         type='RepeatDataset',
-        times=1,
+        times=2,
         dataset=dict(
             type=dataset_type,
             ann_file=data_root + 'train.txt',
